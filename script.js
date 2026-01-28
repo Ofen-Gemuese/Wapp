@@ -245,16 +245,14 @@ function renderDashboardModal(stats, title, subtitle) {
     const ctxCat = document.getElementById('catChart');
     
     // --- FARB LOGIK FÜR CHARTS ---
-    // Da Aurora jetzt auch dunkel ist, nutzen wir fast immer helle Schrift
     let tickColor = '#94a3b8'; 
     let gridColor = 'rgba(255,255,255,0.05)';
     let openBarColor = 'rgba(255,255,255,0.1)';
 
+    // Midnight hat etwas dunklere Töne, aber auch Aurora ist jetzt dunkel!
     if (currentTheme === 'midnight') {
-        // Midnight bekommt etwas dunklere Töne
         tickColor = '#525252'; gridColor = '#262626'; openBarColor = '#262626';
     }
-    // Cosmic und Aurora nutzen die hellen Standardwerte
 
     Chart.defaults.color = tickColor;
     Chart.defaults.borderColor = gridColor;
@@ -430,11 +428,21 @@ function initGridStructure() {
     document.getElementById('week-display').innerText = `${weekDates[0].date} - ${weekDates[6].date}`;
     const grid = document.getElementById('calendar-grid');
     grid.innerHTML = weekDates.map(d => `
-        <div class="day-column flex-shrink-0 bg-white/5 border border-white/10 rounded-[2rem] flex flex-col h-full backdrop-blur-sm relative" id="${d.name}">
+        <div class="day-column flex-shrink-0 bg-white/5 border border-white/10 rounded-[2rem] flex flex-col h-full backdrop-blur-sm relative transition-all duration-300" id="${d.name}">
             <div class="day-header-collapsed hidden flex-col items-center pt-8 h-full w-full" onclick="toggleColumn('${d.name}')"><span class="text-2xl font-black text-white/50 hover:text-white">${d.name.charAt(0)}</span><div class="mt-4 w-1 h-full bg-white/5 rounded-full"></div></div>
             <div class="day-header-expanded p-6 text-white cursor-pointer" onclick="toggleColumn('${d.name}')"><div class="flex justify-between items-start"><div><span class="text-xs font-bold text-gray-400">${d.date}</span><h2 class="text-2xl font-black hover:text-green-400 transition-colors">${d.name}</h2></div><div id="weather-${d.name}" class="flex flex-col items-end text-gray-400"></div></div><div class="h-1 bg-white/10 rounded-full mt-3 overflow-hidden"><div class="h-full bg-green-500 rounded-full w-0 transition-all duration-500" id="progress-${d.name}"></div></div></div>
             <div class="day-content flex-1 flex flex-col overflow-hidden"><div class="flex-1 p-4 overflow-y-auto no-scrollbar task-list space-y-3"></div><div class="p-4"><button onclick="openModal('${d.name}')" class="w-full py-4 bg-white/5 text-white rounded-2xl font-bold hover:bg-green-500 hover:text-black shadow-lg transition-all">+ NEU</button></div></div>
         </div>`).join('');
+
+    // --- AUTOMATISCHER FOKUS AUF DEN HEUTIGEN TAG ---
+    const todayName = new Date().toLocaleDateString('de-DE', { weekday: 'long' });
+    const todayCol = document.getElementById(todayName);
+    if(todayCol) {
+        todayCol.classList.add('current-day-highlight');
+        setTimeout(() => {
+            todayCol.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }, 500);
+    }
 }
 
 window.requestNotificationPermission = () => {
