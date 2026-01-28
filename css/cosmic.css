@@ -49,51 +49,27 @@ input, textarea, select, .bg-slate-800 { background-color: #1e293b; color: white
     background: rgba(74, 222, 128, 0.05); /* Ganz leichter grüner Hintergrund */
 }
 /* =========================================
-   COSMIC MODAL OVERRIDES
-   Damit die Fenster zum Theme passen
+   COSMIC MODAL FIX (Aggressiv)
    ========================================= */
 
-/* 1. Das Fenster selbst (Hintergrund & Rahmen) */
-#taskModal > div, 
-#dashboardModal > div, 
-#archiveModal > div, 
-#confirmModal > div,
-#catManageModal > div {
-    /* Dunkler, leicht violetter Hintergrund mit Transparenz statt solidem Schwarz */
-    background: rgba(15, 23, 42, 0.85) !important; 
-    
-    /* Der wichtige "Milchglas"-Effekt (Blur) */
+/* Wir zielen genau auf die Klasse bg-slate-900 innerhalb der Modals */
+#taskModal .bg-slate-900\/95,
+#dashboardModal .bg-\[\#0f172a\],
+#archiveModal .bg-slate-900,
+#confirmModal .bg-slate-900,
+#catManageModal .bg-slate-900 {
+    background-color: rgba(15, 23, 42, 0.85) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    
-    /* Ein feiner, leuchtender Rand */
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    
-    /* Violetter Schein (Glow) hinter dem Fenster */
-    box-shadow: 0 0 40px rgba(124, 58, 237, 0.15), 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important; /* Lila Rand */
+    box-shadow: 0 0 50px rgba(124, 58, 237, 0.2) !important;
 }
 
-/* 2. Eingabefelder und Dropdowns im Fenster */
+/* Eingabefelder im Modal */
 #taskModal input, 
 #taskModal select, 
 #taskModal .bg-slate-800,
 #catManageModal input {
-    background-color: rgba(255, 255, 255, 0.05) !important; /* Fast durchsichtig */
+    background-color: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: white !important;
-    transition: all 0.3s ease;
 }
-
-/* 3. Wenn man in ein Feld klickt (Fokus) */
-#taskModal input:focus, 
-#taskModal select:focus {
-    border-color: rgba(167, 139, 250, 0.6) !important; /* Helles Lila */
-    box-shadow: 0 0 15px rgba(167, 139, 250, 0.2);
-    background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* 4. Überschriften in den Fenstern */
-#taskModal h2, #dashboardModal h2, #archiveModal h2 {
-    text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
-}
-
