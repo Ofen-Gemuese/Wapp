@@ -1,10 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, writeBatch, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-console.log("Script wird initialisiert...");
+console.log("Master-Script Teil 1/2 geladen...");
 
 // ==========================================
-// 1. CONFIG & GLOBALS
+// 1. KONFIGURATION & GLOBALE VARIABLEN
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyCVRQJ9EXplDxM89YTcLoCfDexmKuFXQbs",
@@ -30,7 +30,7 @@ const daysDisplay = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 
 let currentTheme = localStorage.getItem('plannerTheme') || 'cosmic';
 
 // ==========================================
-// 2. STARTUP
+// 2. INITIALISIERUNG
 // ==========================================
 try {
     app = initializeApp(firebaseConfig);
@@ -40,9 +40,11 @@ try {
     arcRef = collection(db, 'week_archives');
     metaDocRef = doc(db, 'settings', 'weekInfo');
     
-    console.log("Firebase verbunden.");
+    console.log("Firebase Status: Verbunden.");
     initApp();
-} catch(e) { console.error("Firebase Fehler:", e); }
+} catch(e) { 
+    console.error("Firebase Fehler:", e); 
+}
 
 function initApp() {
     applyTheme(currentTheme);
@@ -52,7 +54,7 @@ function initApp() {
 }
 
 // ==========================================
-// 3. UI & THEME
+// 3. THEME & UI MANAGER
 // ==========================================
 function applyTheme(themeName) {
     const linkTag = document.getElementById('theme-stylesheet');
@@ -68,22 +70,16 @@ window.toggleTheme = () => {
     if(!document.getElementById('dashboardModal').classList.contains('hidden')) window.openLiveDashboard();
 };
 
-window.closeModal = () => {
-    const modal = document.getElementById('taskModal');
-    if(modal) {
-        modal.classList.add('hidden'); // Fix: Einfaches Add statt Verkettung
-    }
-};
-
 window.toggleColumn = (day) => {
     const el = document.getElementById(day);
     if(el) el.classList.toggle('collapsed');
 };
 
 // ==========================================
-// 4. DATENBANK & LISTENERS
+// 4. ECHTZEIT-DATEN (FIREBASE LISTENERS)
 // ==========================================
 function setupRealtimeListeners() {
+    // Kategorien laden
     onSnapshot(catRef, snap => {
         allCategories = {};
         const select = document.getElementById('taskCatSelect');
@@ -95,25 +91,22 @@ function setupRealtimeListeners() {
         renderCalendar(currentTasks);
     });
 
+    // Aufgaben laden
     onSnapshot(colRef, snap => {
         currentTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderCalendar(currentTasks);
         updateAllProgressBars();
     });
 
+    // Archiv laden
     onSnapshot(query(arcRef, orderBy('archivedAt', 'desc')), snap => {
         allArchives = snap.docs.map(d => ({id: d.id, ...d.data()}));
     });
 }
 
 // ==========================================
-// 5. DASHBOARD & STATS
+// 5. STATISTIK-BERECHNUNG
 // ==========================================
-window.openLiveDashboard = () => {
-    const stats = generateStatsObject(currentTasks);
-    renderDashboardModal(stats, "Aktuelle Woche", "Live Übersicht");
-};
-
 function generateStatsObject(tasks) {
     const total = tasks.length;
     const done = tasks.filter(t => t.completed).length;
@@ -149,6 +142,11 @@ function generateStatsObject(tasks) {
 
     return { total, done, percent, prioScore, hours: (totalMins/60).toFixed(1), weekData, catStats };
 }
+
+window.openLiveDashboard = () => {
+    const stats = generateStatsObject(currentTasks);
+    renderDashboardModal(stats, "Aktuelle Woche", "Live Übersicht");
+};
 
 function renderDashboardModal(stats, title, subtitle) {
     const elTitle = document.getElementById('dashboard-title');
@@ -202,30 +200,53 @@ function renderDashboardModal(stats, title, subtitle) {
 }
 
 window.closeDashboard = () => document.getElementById('dashboardModal').classList.add('hidden');
+console.log("Master-Script Teil 2/2 geladen...");
 
 // ==========================================
-// 6. ARCHIV & KATEGORIEN (Fix für ReferenceErrors)
+// 6. ARCHIV-LOGIK
 // ==========================================
 window.openArchive = () => {
     const list = document.getElementById('archive-list');
     list.innerHTML = allArchives.map(a => `
-        <div class="p-4 bg-white/5 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-white/10" onclick="showArchiveStats('${a.id}')">
+        <div class="p-4 bg-white/5 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-white/10" onclick="window.showArchiveStats('${a.id}')">
             <div><div class="font-bold text-green-400">${a.weekRange}</div><div class="text-[10px] text-gray-500">Erfolg: ${a.percent}%</div></div>
-            <button onclick="event.stopPropagation(); deleteArchiveEntry('${a.id}')" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-        </div>`).join('') || "Archiv leer";
+            <button onclick="event.stopPropagation(); window.deleteArchiveEntry('${a.id}')" class="text-red-400 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>`).join('') || "<div class='text-gray-500 text-center py-4'>Keine Einträge</div>";
     document.getElementById('archiveModal').classList.remove('hidden');
     lucide.createIcons();
 };
 
 window.closeArchive = () => document.getElementById('archiveModal').classList.add('hidden');
 
+window.showArchiveStats = (id) => {
+    const a = allArchives.find(x => x.id === id);
+    if(a) { renderDashboardModal(a, a.weekRange, "Archivierte Daten"); document.getElementById('archiveModal').classList.add('hidden'); }
+};
+
+window.deleteArchiveEntry = (id) => {
+    window.openConfirm(async () => { await deleteDoc(doc(db, 'week_archives', id)); window.openArchive(); });
+};
+
+window.clearAllArchives = () => {
+    window.openConfirm(async () => { 
+        const snap = await getDocs(arcRef);
+        const batch = writeBatch(db);
+        snap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        window.openArchive();
+    });
+};
+
+// ==========================================
+// 7. KATEGORIEN-MANAGEMENT
+// ==========================================
 window.openCatManage = () => {
     const list = document.getElementById('cat-manage-list');
     list.innerHTML = Object.entries(allCategories).map(([id, c]) => `
-        <div class="flex justify-between p-3 bg-white/5 rounded-xl mb-2">
+        <div class="flex justify-between p-3 bg-white/5 rounded-xl mb-2 items-center">
             <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background:${c.color}"></div>${c.name}</div>
-            <button onclick="deleteCategory('${id}')" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-        </div>`).join('');
+            <button onclick="window.deleteCategory('${id}')" class="text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>`).join('') || "<div class='text-gray-500 text-center py-4'>Keine Kategorien</div>";
     document.getElementById('catManageModal').classList.remove('hidden');
     lucide.createIcons();
 };
@@ -237,15 +258,49 @@ window.deleteCategory = (id) => {
 };
 
 // ==========================================
-// 7. TASK ACTIONS (Save, Delete, Subtasks)
+// 8. TASK CRUD (ERSTELLEN, EDITIEREN, LÖSCHEN)
 // ==========================================
+window.openModal = (d) => {
+    document.getElementById('modalTitle').innerText = "Neue Aufgabe";
+    document.getElementById('taskId').value = "";
+    document.getElementById('taskDay').value = d;
+    document.getElementById('taskText').value = "";
+    document.getElementById('taskTimeFrom').value = "";
+    document.getElementById('taskTimeTo').value = "";
+    document.getElementById('taskPriority').checked = false;
+    document.getElementById('newCatName').value = "";
+    window.currentSubtasks = [];
+    window.selectedRecurDays = [];
+    window.renderModalSubtasks();
+    document.querySelectorAll('.recur-btn').forEach(b => b.classList.remove('bg-green-500'));
+    document.getElementById('btnDelete').classList.add('hidden');
+    document.getElementById('taskModal').classList.remove('hidden');
+};
+
+window.editTask = (id) => {
+    const t = currentTasks.find(x => x.id === id);
+    if(!t) return;
+    document.getElementById('modalTitle').innerText = "Bearbeiten";
+    document.getElementById('taskId').value = id;
+    document.getElementById('taskDay').value = t.day;
+    document.getElementById('taskText').value = t.text;
+    document.getElementById('taskTimeFrom').value = t.timeFrom || "";
+    document.getElementById('taskTimeTo').value = t.timeTo || "";
+    document.getElementById('taskPriority').checked = t.isPriority || false;
+    document.getElementById('taskCatSelect').value = t.categoryId || "";
+    window.currentSubtasks = t.subtasks || [];
+    window.renderModalSubtasks();
+    document.getElementById('btnDelete').classList.remove('hidden');
+    document.getElementById('taskModal').classList.remove('hidden');
+};
+
 window.saveTask = async () => {
     const id = document.getElementById('taskId').value;
     const text = document.getElementById('taskText').value;
     const newCat = document.getElementById('newCatName').value;
     let catId = document.getElementById('taskCatSelect').value;
 
-    if(!text) return;
+    if(!text) { alert("Bitte Text eingeben"); return; }
 
     if(newCat.trim() !== "") {
         const cDoc = await addDoc(catRef, { name: newCat, color: document.getElementById('newCatColor').value });
@@ -277,9 +332,28 @@ window.saveTask = async () => {
     window.closeModal();
 };
 
-// Subtask Logik (Neu/Repariert)
+window.deleteTask = () => {
+    const id = document.getElementById('taskId').value;
+    if(!id) return;
+    window.openConfirm(async () => { 
+        await deleteDoc(doc(db, 'tasks', id)); 
+        window.closeModal(); 
+    });
+};
+
+window.closeModal = () => {
+    const modal = document.getElementById('taskModal');
+    if(modal) modal.classList.add('hidden');
+};
+
+window.toggleStatus = (id, s) => updateDoc(doc(db, 'tasks', id), { completed: !s });
+
+// ==========================================
+// 9. SUBTASKS LOGIK
+// ==========================================
 window.renderModalSubtasks = () => {
     const list = document.getElementById('subtaskList');
+    if(!list) return;
     list.innerHTML = window.currentSubtasks.map((st, i) => `
         <div class="flex items-center gap-2 p-1 border-b border-white/5">
             <input type="checkbox" ${st.done ? 'checked' : ''} onchange="window.toggleModalSubtask(${i})">
@@ -308,7 +382,7 @@ window.toggleModalSubtask = (i) => {
 };
 
 // ==========================================
-// 8. RENDERER & CALENDAR
+// 10. RENDERER & KALENDER-STRUKTUR
 // ==========================================
 window.renderCalendar = (tasks) => {
     const grid = document.getElementById('calendar-grid');
@@ -321,15 +395,19 @@ window.renderCalendar = (tasks) => {
         
         list.innerHTML = dayTasks.map(t => {
             const cat = allCategories[t.categoryId] || { color: 'transparent', name: '' };
+            const subDone = (t.subtasks || []).filter(s => s.done).length;
+            const subTotal = (t.subtasks || []).length;
+            
             return `
-            <div class="task-card p-4 mb-3 rounded-2xl bg-white/5 border border-white/10 cursor-pointer" onclick="editTask('${t.id}')">
+            <div class="task-card p-4 mb-3 rounded-2xl bg-white/5 border border-white/10 cursor-pointer transition-all" onclick="window.editTask('${t.id}')">
                 <div class="flex justify-between items-start">
                     <div class="flex-1 min-w-0">
                         <span class="text-[10px] font-bold text-green-400 font-mono">${t.timeFrom || ''}</span>
                         <h3 class="text-sm font-bold text-white truncate">${t.isPriority?'🔥 ':''}${t.text}</h3>
-                        ${t.categoryId ? `<div class="mt-2 text-[9px] uppercase font-bold px-2 py-0.5 rounded inline-block bg-white/5 border border-white/10" style="color:${cat.color}">${cat.name}</div>` : ''}
+                        ${subTotal > 0 ? `<div class="text-[9px] text-gray-500 mt-1">${subDone}/${subTotal} Unterschritte</div>` : ''}
+                        ${t.categoryId ? `<div class="mt-2 text-[8px] uppercase font-bold px-2 py-0.5 rounded inline-block bg-white/5 border border-white/10" style="color:${cat.color}">${cat.name}</div>` : ''}
                     </div>
-                    <button onclick="event.stopPropagation(); toggleStatus('${t.id}', ${t.completed})">
+                    <button onclick="event.stopPropagation(); window.toggleStatus('${t.id}', ${t.completed})">
                         <i data-lucide="${t.completed ? 'check-circle' : 'circle'}" class="w-5 h-5 ${t.completed ? 'text-green-500' : 'text-white/20'}"></i>
                     </button>
                 </div>
@@ -360,59 +438,38 @@ function initGridStructure() {
     document.getElementById('week-display').innerText = `${weekDates[0].date} - ${weekDates[6].date}`;
     
     grid.innerHTML = weekDates.map(d => `
-        <div class="day-column flex-shrink-0 bg-white/5 border border-white/10 rounded-[2rem] flex flex-col h-full w-[85vw] md:w-[320px] relative transition-all duration-300" id="${d.name}">
-            <div class="p-6 cursor-pointer" onclick="toggleColumn('${d.name}')">
+        <div class="day-column flex-shrink-0 bg-white/5 border border-white/10 rounded-[2rem] flex flex-col h-full w-[85vw] md:w-[320px] relative" id="${d.name}">
+            <div class="p-6 cursor-pointer" onclick="window.toggleColumn('${d.name}')">
                 <span class="text-xs text-gray-500">${d.date}</span>
                 <div class="flex justify-between items-center"><h2 class="text-2xl font-black">${d.name}</h2><div id="weather-${d.name}"></div></div>
                 <div class="h-1 bg-white/10 rounded-full mt-3 overflow-hidden"><div id="progress-${d.name}" class="h-full bg-green-500 w-0 transition-all duration-500"></div></div>
             </div>
             <div class="flex-1 p-4 overflow-y-auto task-list no-scrollbar space-y-3"></div>
-            <div class="p-4"><button onclick="openModal('${d.name}')" class="w-full py-4 bg-white/5 rounded-2xl font-bold hover:bg-green-500 hover:text-black transition-all">+ NEU</button></div>
+            <div class="p-4"><button onclick="window.openModal('${d.name}')" class="w-full py-4 bg-white/5 rounded-2xl font-bold hover:bg-green-500 hover:text-black transition-all">+ NEU</button></div>
         </div>`).join('');
 
     const todayName = new Date().toLocaleDateString('de-DE', { weekday: 'long' });
     const todayCol = document.getElementById(todayName);
-    if(todayCol) {
-        todayCol.classList.add('current-day-highlight');
-        setTimeout(() => todayCol.scrollIntoView({ behavior: 'smooth', inline: 'center' }), 500);
-    }
+    if(todayCol) todayCol.classList.add('current-day-highlight');
 }
 
-// Standard Modal Actions
-window.openModal = (d) => {
-    document.getElementById('taskId').value = "";
-    document.getElementById('taskDay').value = d;
-    document.getElementById('taskText').value = "";
-    document.getElementById('newCatName').value = "";
-    document.getElementById('taskTimeFrom').value = "";
-    document.getElementById('taskTimeTo').value = "";
-    window.currentSubtasks = [];
-    window.renderModalSubtasks();
-    window.selectedRecurDays = [];
-    document.getElementById('taskModal').classList.remove('hidden');
+// ==========================================
+// 11. ALERTS & CONFIRM
+// ==========================================
+window.requestNotificationPermission = () => {
+    if (!("Notification" in window)) return;
+    Notification.requestPermission().then(p => {
+        if (p === "granted") {
+            new Notification("Planner Pro", { body: "Benachrichtigungen aktiviert!" });
+            document.getElementById('notify-btn').classList.add('hidden');
+        }
+    });
 };
 
-window.editTask = (id) => {
-    const t = currentTasks.find(x => x.id === id);
-    if(!t) return;
-    document.getElementById('taskId').value = id;
-    document.getElementById('taskDay').value = t.day;
-    document.getElementById('taskText').value = t.text;
-    document.getElementById('taskTimeFrom').value = t.timeFrom || "";
-    document.getElementById('taskTimeTo').value = t.timeTo || "";
-    document.getElementById('taskPriority').checked = t.isPriority || false;
-    document.getElementById('taskCatSelect').value = t.categoryId || "";
-    window.currentSubtasks = t.subtasks || [];
-    window.renderModalSubtasks();
-    document.getElementById('taskModal').classList.remove('hidden');
-};
-
-window.toggleStatus = (id, s) => updateDoc(doc(db, 'tasks', id), { completed: !s });
 window.openConfirm = (action) => { pendingConfirmAction = action; document.getElementById('confirmModal').classList.remove('hidden'); };
-window.closeConfirm = () => document.getElementById('confirmModal').classList.add('hidden');
-document.getElementById('btnConfirmAction').onclick = () => { if(pendingConfirmAction) pendingConfirmAction(); closeConfirm(); };
+window.closeConfirm = () => { document.getElementById('confirmModal').classList.add('hidden'); };
+document.getElementById('btnConfirmAction').onclick = () => { if(pendingConfirmAction) pendingConfirmAction(); window.closeConfirm(); };
 
-// Extra Helpers
 window.toggleDayRecur = (btn, day) => {
     if(window.selectedRecurDays.includes(day)) {
         window.selectedRecurDays = window.selectedRecurDays.filter(d => d !== day);
@@ -423,7 +480,33 @@ window.toggleDayRecur = (btn, day) => {
     }
 };
 
-async function fetchWeather() { /* Wie zuvor */ }
-async function checkWeekStatus() { /* Wie zuvor */ }
+async function fetchWeather() {
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=51.16&longitude=10.45&daily=weathercode,temperature_2m_max&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const iconMap = (c) => c<=3?'sun':c<=48?'cloud':c<=67?'cloud-rain':'snowflake';
+        daysDisplay.forEach((day, i) => {
+            if(data.daily) {
+                const icon = iconMap(data.daily.weathercode[i]);
+                const temp = Math.round(data.daily.temperature_2m_max[i]);
+                const el = document.getElementById(`weather-${day}`);
+                if(el) el.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i><span class="text-[10px] ml-1">${temp}°</span>`;
+            }
+        });
+        lucide.createIcons();
+    } catch(e) {}
+}
 
+async function checkWeekStatus() {
+    const snap = await getDoc(metaDocRef);
+    const d = new Date();
+    const diff = d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1);
+    const mondayStr = new Date(d.setDate(diff)).toISOString().split('T')[0];
+    if (!snap.exists() || snap.data().currentMonday !== mondayStr) {
+        await setDoc(metaDocRef, { currentMonday: mondayStr });
+    }
+}
+
+// Start
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initGridStructure); else initGridStructure();
