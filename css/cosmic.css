@@ -1,70 +1,101 @@
-/* css/cosmic.css */
-body { background-color: #0f172a; color: white; }
+/* css/cosmic.css - Refactored (Clean Code, Same Design) */
 
-/* Background Animation */
+/* =========================================
+   1. BASIS & HINTERGRUND
+   ========================================= */
+body { 
+    background-color: #0f172a; 
+    color: white; 
+}
+
 .gradient-background {
     display: block;
     background: linear-gradient(-45deg, #1f1c2c, #28243b, #3e1f47, #16161a);
-    background-size: 400% 400%; animation: liquidGradient 20s ease infinite;
+    background-size: 400% 400%; 
+    animation: liquidGradient 20s ease infinite;
 }
-@keyframes liquidGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-/* Particles */
+@keyframes liquidGradient { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
+}
+
+/* Partikel-Effekte */
 .particles { display: block; }
 .particles span {
     position: absolute; display: block; width: 4px; height: 4px;
-    background: rgba(255,255,255,0.2); border-radius: 50%; animation: moveParticle 15s linear infinite;
+    background: rgba(255,255,255,0.2); border-radius: 50%; 
+    animation: moveParticle 15s linear infinite;
 }
 .particles span:nth-child(1) { top:10%; left:20%; animation-delay: 0s; }
 .particles span:nth-child(2) { top:50%; left:80%; animation-delay: 2s; }
 .particles span:nth-child(3) { top:70%; left:40%; animation-delay: 4s; }
+
 @keyframes moveParticle {
     0% { transform: translate(0,0) scale(1); opacity: 0.2; }
     50% { transform: translate(20px,-20px) scale(1.3); opacity: 0.5; }
     100% { transform: translate(-10px,10px) scale(1); opacity: 0.2; }
 }
 
-/* UI Elements */
-.bg-white\/5, .bg-white\/10 { background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-.day-column { background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
-.day-column.collapsed { background: rgba(255,255,255,0.02); }
-.day-column.drag-over { background: rgba(74, 222, 128, 0.1); border-color: #4ade80; }
-
-/* Text Colors */
-.text-white\/50 { color: rgba(255,255,255,0.5); }
-
-/* Modals */
-.bg-slate-900, .bg-\[\#0f172a\] { background-color: #0f172a; border: 1px solid rgba(255,255,255,0.1); }
-.bg-slate-900\/95 { background-color: rgba(15, 23, 42, 0.95); }
-
-/* Inputs */
-input, textarea, select, .bg-slate-800 { background-color: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.1); }
-.task-card.expanded .task-details-wrapper { border-top-color: rgba(255,255,255,0.1); }
-.recur-btn.active { background-color: #4ade80; color: black; }
-
-/* Hervorhebung für den aktuellen Tag */
-.day-column.current-day-highlight {
-    border: 1px solid #4ade80 !important; /* Grüner Rand */
-    box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); /* Sanftes grünes Leuchten */
-    background: rgba(74, 222, 128, 0.05); /* Ganz leichter grüner Hintergrund */
-}
 /* =========================================
-   COSMIC MODAL FIX (Aggressiv)
+   2. UI ELEMENTE (Buttons, Spalten)
+   ========================================= */
+/* Standard Glas-Elemente */
+.bg-white\/5, .bg-white\/10, .day-column { 
+    background-color: rgba(255,255,255,0.05) !important; 
+    border: 1px solid rgba(255,255,255,0.1) !important; 
+    backdrop-filter: blur(4px);
+}
+
+/* Zugeklappte Spalte */
+.day-column.collapsed { 
+    background: rgba(255,255,255,0.02) !important; 
+}
+
+/* Drag & Drop Highlight */
+.day-column.drag-over { 
+    background: rgba(139, 92, 246, 0.2) !important; 
+    border-color: #8b5cf6 !important; 
+}
+
+/* "Heute" Highlight */
+.day-column.current-day-highlight {
+    border: 1px solid #4ade80 !important; 
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); 
+    background: rgba(74, 222, 128, 0.05) !important;
+}
+
+/* Wiederholungs-Buttons (Mo, Di, Mi...) */
+.recur-btn.active { 
+    background-color: #4ade80 !important; 
+    color: black !important; 
+}
+
+/* =========================================
+   3. MODALS & FENSTER (Optimiert)
+   Hier wurden Punkt 1 (Selektoren) und 2 (Redundanz) angewendet.
    ========================================= */
 
-/* Wir zielen genau auf die Klasse bg-slate-900 innerhalb der Modals */
-#taskModal .bg-slate-900\/95,
-#dashboardModal .bg-\[\#0f172a\],
-#archiveModal .bg-slate-900,
-#confirmModal .bg-slate-900,
-#catManageModal .bg-slate-900 {
-    background-color: rgba(15, 23, 42, 0.85) !important;
+/* Wir sprechen direkt das Fenster-Div an (#id > div). 
+   Das ersetzt die unsicheren Klassen wie .bg-[#0f172a] */
+#taskModal > div,
+#dashboardModal > div,
+#archiveModal > div,
+#confirmModal > div,
+#catManageModal > div {
+    /* Design 1:1 übernommen aus dem vorherigen "Fix" */
+    background-color: rgba(15, 23, 42, 0.85) !important; 
     backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important; /* Lila Rand */
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
     box-shadow: 0 0 50px rgba(124, 58, 237, 0.2) !important;
+    color: white !important;
 }
 
-/* Eingabefelder im Modal */
+/* =========================================
+   4. EINGABEFELDER (Zusammengefasst)
+   ========================================= */
+/* Alle Inputs in Modals werden hier zentral gestylt */
 #taskModal input, 
 #taskModal select, 
 #taskModal .bg-slate-800,
@@ -72,4 +103,19 @@ input, textarea, select, .bg-slate-800 { background-color: #1e293b; color: white
     background-color: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: white !important;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* Fokus-Effekt (Wenn man reinklickt) */
+#taskModal input:focus, 
+#taskModal select:focus {
+    border-color: #8b5cf6 !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+/* Überschriften in Fenstern */
+#taskModal h2, #dashboardModal h2, #archiveModal h2 {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
