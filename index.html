@@ -10,10 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link rel="stylesheet" href="./css/base.css">
-    
     <link rel="stylesheet" href="./css/cosmic.css" id="theme-stylesheet">
 </head>
 <body class="overflow-hidden bg-slate-900 text-white"> 
+    
     <div class="gradient-background"></div>
     <div class="particles">
         <span></span><span></span><span></span><span></span><span></span>
@@ -21,107 +21,301 @@
     </div>
     
     <div class="h-full w-full flex flex-col p-4 md:p-6 relative z-10">
+        
         <header class="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 shrink-0">
             <div>
-                <h1 class="text-3xl md:text-4xl font-black tracking-tighter drop-shadow-lg">PLANNER <span class="text-green-400">PRO</span></h1>
-                <p id="week-display" class="text-gray-300 font-mono text-sm tracking-widest uppercase">Lade...</p>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tighter drop-shadow-lg">PLANNER <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">PRO</span></h1>
+                <p class="text-sm text-white/50 font-medium tracking-wide">DEINE WOCHE IM FOKUS</p>
             </div>
-            
-            <div class="header-actions flex gap-3 w-full md:w-auto overflow-x-auto no-scrollbar pb-1">
-                <button onclick="requestNotificationPermission()" class="bg-blue-500/10 text-blue-400 px-4 py-3 rounded-xl text-xs font-bold border border-blue-500/20 whitespace-nowrap hover:bg-blue-500/20 transition-colors" id="notify-btn">🔔 Alerts an</button>
-                <button onclick="toggleTheme()" class="bg-white/10 p-3 rounded-xl backdrop-blur-md min-w-[44px] hover:bg-white/20 transition-colors" title="Design wechseln"><i data-lucide="palette" class="w-5 h-5"></i></button>
-                <button onclick="openArchive()" class="bg-white/10 p-3 rounded-xl backdrop-blur-md min-w-[44px]"><i data-lucide="archive" class="w-5 h-5"></i></button>
-                <button onclick="openLiveDashboard()" class="bg-white/10 p-3 rounded-xl backdrop-blur-md min-w-[44px]"><i data-lucide="pie-chart" class="w-5 h-5"></i></button>
-                <button onclick="openCatManage()" class="bg-white/10 p-3 rounded-xl backdrop-blur-md min-w-[44px]"><i data-lucide="settings-2" class="w-5 h-5"></i></button>
+
+            <div class="flex gap-3 self-end md:self-auto">
+                <button onclick="window.openLiveDashboard()" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group backdrop-blur-md" title="Dashboard öffnen">
+                    <i data-lucide="pie-chart" class="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform"></i>
+                </button>
+                <button onclick="window.openCategoryManager()" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group backdrop-blur-md" title="Kategorien verwalten">
+                    <i data-lucide="layers" class="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform"></i>
+                </button>
+                <button onclick="window.openArchive()" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group backdrop-blur-md" title="Archiv">
+                    <i data-lucide="archive" class="w-5 h-5 text-green-400 group-hover:scale-110 transition-transform"></i>
+                </button>
+                 <button id="notify-btn" onclick="requestNotificationPermission()" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group backdrop-blur-md hidden" title="Benachrichtigungen aktivieren">
+                    <i data-lucide="bell" class="w-5 h-5 text-yellow-400 group-hover:scale-110 transition-transform"></i>
+                </button>
             </div>
         </header>
-
-        <div class="flex-1 flex gap-4 overflow-x-auto pb-4 no-scrollbar items-start h-full" id="calendar-grid">
-            <div class="text-white/50 p-10 w-full text-center">
-                <p>Kalender wird geladen...</p>
-                <p class="text-xs mt-2 opacity-50">Falls nichts passiert: Drücke F12 für Fehler.</p>
+        
+        <div id="calendar-grid" class="flex-1 overflow-x-auto overflow-y-hidden flex gap-4 pb-2 snap-x snap-mandatory no-scrollbar mask-image-gradient">
+            
+            <div id="Montag" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Montag</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Montag')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">MONTAG</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    </div>
             </div>
+
+            <div id="Dienstag" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Dienstag</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Dienstag')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">DIENSTAG</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <div id="Mittwoch" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Mittwoch</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Mittwoch')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">MITTWOCH</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <div id="Donnerstag" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Donnerstag</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Donnerstag')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">DONNERSTAG</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <div id="Freitag" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Freitag</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Freitag')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">FREITAG</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <div id="Samstag" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Samstag</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Samstag')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">SAMSTAG</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <div id="Sonntag" class="day-column flex flex-col h-full rounded-[2rem] p-4 shrink-0 relative group transition-all duration-300 snap-center border border-white/5 shadow-xl backdrop-blur-sm">
+                <div class="day-header-expanded flex justify-between items-center mb-4 cursor-pointer" onclick="toggleColumn(this.parentElement)">
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight">Sonntag</h2>
+                        <span class="text-xs text-white/40 font-mono date-display">Loading...</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); openAddTask('Sonntag')" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="day-header-collapsed hidden h-full flex-col items-center justify-center gap-4 py-4">
+                    <span class="text-lg font-bold vertical-text tracking-widest text-white/70">SONNTAG</span>
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                </div>
+                <div class="day-content flex-1 overflow-y-auto space-y-3 min-h-0 pr-1 custom-scrollbar" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+            
+        </div> </div> <div id="taskModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[90] backdrop-blur-md">
+        <div class="bg-slate-900 w-full max-w-md rounded-[2rem] p-6 border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Neuer Task</h2>
+                <button onclick="closeTaskModal()" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                    <i data-lucide="x" class="w-6 h-6 text-gray-400"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="saveTask(event)" class="space-y-5">
+                <input type="hidden" id="taskDay">
+                
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Titel</label>
+                    <input type="text" id="taskInput" class="w-full bg-black/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 border border-white/5 transition-all" placeholder="Was steht an?" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Uhrzeit</label>
+                        <input type="time" id="taskTime" class="w-full bg-black/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 border border-white/5 transition-all text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Dauer (Min)</label>
+                        <input type="number" id="taskDuration" class="w-full bg-black/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 border border-white/5 transition-all" placeholder="z.B. 60">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Kategorie</label>
+                    <div id="category-selector" class="flex flex-wrap gap-2">
+                        </div>
+                    <input type="hidden" id="selectedCategory" required>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/20 transform hover:scale-[1.02] transition-all">
+                    Speichern
+                </button>
+            </form>
         </div>
     </div>
 
-    <div id="confirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[90] hidden flex justify-center items-center p-4">
-        <div class="bg-slate-900 w-full max-w-sm rounded-[2rem] p-6 border border-white/10 shadow-2xl">
-            <div class="text-center mb-6"><h3 class="text-xl font-bold mb-2">Wirklich löschen?</h3></div>
+    <div id="confirmModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[100] backdrop-blur-md">
+        <div class="bg-slate-900 w-full max-w-sm rounded-[2rem] p-6 border border-white/10 text-center shadow-2xl">
+            <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-8 h-8 text-red-400"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Bist du sicher?</h3>
+            <p class="text-gray-400 mb-6 text-sm">Diese Aktion kann nicht rückgängig gemacht werden.</p>
             <div class="flex gap-3">
-                <button onclick="closeConfirm()" class="flex-1 py-3 bg-white/5 rounded-xl font-bold">Abbrechen</button>
-                <button id="btnConfirmAction" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">Löschen</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="taskModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex justify-center items-center p-4">
-        <div class="bg-slate-900/95 w-full max-w-md rounded-[2rem] p-6 border border-white/10 shadow-2xl max-h-[90dvh] overflow-y-auto">
-            <h2 id="modalTitle" class="text-2xl font-bold mb-4">Aufgabe</h2>
-            <input type="hidden" id="taskDay"><input type="hidden" id="taskId">
-            <div class="space-y-4">
-                <input type="text" id="taskText" placeholder="Titel..." class="w-full bg-white/5 border border-white/10 rounded-xl p-4 outline-none">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="time" id="taskTimeFrom" class="bg-slate-800 border border-white/10 rounded-xl p-3 outline-none w-full text-center">
-                    <input type="time" id="taskTimeTo" class="bg-slate-800 border border-white/10 rounded-xl p-3 outline-none w-full text-center">
-                </div>
-                <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
-                    <input type="checkbox" id="taskPriority" class="w-5 h-5 accent-red-500"><label for="taskPriority" class="text-sm">🔥 Hohe Priorität</label>
-                </div>
-                <div class="bg-slate-800 rounded-xl p-3 border border-white/10">
-                    <div id="subtaskList" class="space-y-2 mb-3"></div>
-                    <div class="flex gap-2"><input type="text" id="newSubtaskInput" placeholder="+ Schritt" class="flex-1 bg-transparent p-2 outline-none"><button onclick="addSubtask()" class="text-green-400 font-bold px-2">+</button></div>
-                </div>
-                <div class="flex justify-between gap-1">
-                    <button type="button" onclick="toggleDayRecur(this, 'Montag')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">Mo</button>
-                    <button type="button" onclick="toggleDayRecur(this, 'Dienstag')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">Di</button>
-                    <button type="button" onclick="toggleDayRecur(this, 'Mittwoch')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">Mi</button>
-                    <button type="button" onclick="toggleDayRecur(this, 'Donnerstag')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">Do</button>
-                    <button type="button" onclick="toggleDayRecur(this, 'Freitag')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">Fr</button>
-                    <button type="button" onclick="toggleDayRecur(this, 'Samstag')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">Sa</button>
-                    <button type="button" onclick="toggleDayRecur(this, 'Sonntag')" class="recur-btn p-2 rounded-lg bg-white/5 text-xs w-full">So</button>
-                </div>
-                <select id="taskCatSelect" class="bg-slate-800 border border-white/10 rounded-xl p-3 w-full"><option value="">Keine Kategorie</option></select>
-                <div class="bg-white/5 rounded-xl p-3 border border-dashed border-white/10 flex items-center gap-3">
-                    <input type="text" id="newCatName" placeholder="Neue Kategorie..." class="flex-1 bg-transparent outline-none"><input type="color" id="newCatColor" value="#22c55e" class="w-8 h-8 rounded border-0 p-0">
-                </div>
-            </div>
-            <div class="flex gap-3 mt-6">
-                <button onclick="deleteTask()" id="btnDelete" class="bg-red-500/10 text-red-500 p-4 rounded-2xl hidden"><i data-lucide="trash-2"></i></button>
-                <button onclick="duplicateTask()" id="btnDuplicate" class="bg-blue-600/20 text-blue-400 p-4 rounded-2xl hidden"><i data-lucide="copy"></i></button>
-                <button onclick="saveTask()" class="flex-1 bg-green-500 p-4 rounded-2xl font-bold text-black">Speichern</button>
-                <button onclick="closeModal()" class="flex-1 bg-white/5 p-4 rounded-2xl">Abbruch</button>
+                <button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all font-medium">Abbrechen</button>
+                <button id="btnConfirmAction" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg shadow-red-500/20 transition-all">Löschen</button>
             </div>
         </div>
     </div>
 
-    <div id="dashboardModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[60]">
-        <div class="bg-[#0f172a] w-full max-w-4xl rounded-[2rem] p-6 border border-white/10 max-h-[95dvh] overflow-y-auto">
-            <div class="flex justify-between mb-4"><h2 class="text-3xl font-bold" id="dashboard-title">Statistik</h2><button onclick="closeDashboard()"><i data-lucide="x"></i></button></div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div class="bg-white/5 p-4 rounded-2xl">Done: <span id="stat-total-tasks" class="font-bold">0</span></div>
-                <div class="bg-white/5 p-4 rounded-2xl">Zeit: <span id="stat-hours" class="font-bold text-blue-400">0h</span></div>
-                <div class="bg-white/5 p-4 rounded-2xl">Prio: <span id="stat-prio" class="font-bold text-red-400">0%</span></div>
-                <div class="bg-white/5 p-4 rounded-2xl">Quote: <span id="stat-percent" class="font-bold text-green-400">0%</span></div>
+    <div id="archiveModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[70] backdrop-blur-md">
+        <div class="bg-slate-900 w-full max-w-2xl rounded-[2rem] p-6 border border-white/10 max-h-[90dvh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-6 shrink-0">
+                <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">Archiv</h2>
+                <div class="flex gap-2">
+                    <button onclick="openConfirm(clearAllArchives)" class="text-xs px-3 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 transition-all">
+                        Alles löschen
+                    </button>
+                    <button onclick="closeArchive()" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div class="h-64"><canvas id="weekChart"></canvas></div><div class="h-64 flex justify-center"><canvas id="catChart"></canvas></div></div>
-            <div id="cat-stats-list" class="space-y-2"></div>
-        </div>
-    </div>
-    
-    <div id="archiveModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[70]">
-        <div class="bg-slate-900 w-full max-w-2xl rounded-[2rem] p-6 border border-white/10 max-h-[90dvh] flex flex-col">
-            <div class="flex justify-between mb-4"><h2>Archiv</h2><div class="flex gap-2"><button onclick="clearAllArchives()" class="text-red-400">Alles löschen</button><button onclick="closeArchive()">X</button></div></div>
-            <div id="archive-list" class="space-y-4 overflow-y-auto flex-1"></div>
+            <div id="archive-list" class="space-y-4 overflow-y-auto flex-1 custom-scrollbar pr-2">
+                </div>
         </div>
     </div>
 
-    <div id="catManageModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[80]">
-        <div class="bg-slate-900 w-full max-w-md rounded-[2rem] p-6 border border-white/10 max-h-[80dvh] flex flex-col">
-            <div class="flex justify-between mb-4"><h2>Kategorien</h2><button onclick="closeCatManage()">X</button></div>
-            <div id="cat-manage-list" class="space-y-2 overflow-y-auto flex-1"></div>
+    <div id="catManageModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[80] backdrop-blur-md">
+        <div class="bg-slate-900 w-full max-w-md rounded-[2rem] p-6 border border-white/10 max-h-[85dvh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-6 shrink-0">
+                <h2 class="text-2xl font-bold">Kategorien</h2>
+                <button onclick="closeCategoryManager()" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="addCategory(event)" class="mb-6 shrink-0">
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="newCatName" placeholder="Neue Kategorie..." class="flex-1 bg-black/20 rounded-xl px-4 py-3 border border-white/5 focus:ring-2 focus:ring-purple-500/50 outline-none" required>
+                    <input type="color" id="newCatColor" class="w-12 h-full rounded-xl cursor-pointer bg-transparent border-none" value="#a855f7">
+                </div>
+                <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-500 rounded-xl font-bold shadow-lg shadow-purple-500/20 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Hinzufügen
+                </button>
+            </form>
+
+            <div id="manage-cat-list" class="space-y-2 overflow-y-auto flex-1 custom-scrollbar pr-2">
+                </div>
+        </div>
+    </div>
+
+    <div id="dashboardModal" class="fixed inset-0 bg-black/90 hidden flex justify-center items-center p-4 z-[80] backdrop-blur-md">
+        <div class="bg-slate-900 w-full max-w-4xl rounded-[2rem] p-6 border border-white/10 max-h-[90dvh] overflow-y-auto flex flex-col shadow-2xl custom-scrollbar">
+            
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 id="dashboard-title" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Dashboard</h2>
+                    <p id="dashboard-subtitle" class="text-gray-400 text-sm font-mono uppercase tracking-widest">Übersicht</p>
+                </div>
+                <button onclick="closeDashboard()" class="p-2 bg-white/5 rounded-full hover:bg-white/20 transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center hover:bg-white/10 transition-all">
+                    <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">Erledigt</div>
+                    <div id="stat-total-tasks" class="text-2xl font-black text-white">-/-</div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center hover:bg-white/10 transition-all">
+                    <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">Fokus Zeit</div>
+                    <div id="stat-hours" class="text-2xl font-black text-blue-400">-h</div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center hover:bg-white/10 transition-all">
+                    <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">Prio Score</div>
+                    <div id="stat-prio" class="text-2xl font-black text-purple-400">-%</div>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center hover:bg-white/10 transition-all">
+                    <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">Quote</div>
+                    <div id="stat-percent" class="text-2xl font-black text-green-400">-%</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 h-64">
+                    <canvas id="weekChart"></canvas>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 h-64 flex justify-center items-center relative">
+                    <canvas id="catChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                <h3 class="text-sm font-bold text-gray-300 mb-4 uppercase tracking-wider">Kategorien Details</h3>
+                <div id="cat-stats-list" class="space-y-3">
+                    </div>
+            </div>
         </div>
     </div>
 
     <script type="module" src="./script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
