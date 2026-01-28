@@ -1,10 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, writeBatch, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-console.log("Script gestartet...");
+console.log("Script wird initialisiert...");
 
 // ==========================================
-// 1. KONFIGURATION & VARIABLEN
+// 1. CONFIG & GLOBALS
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyCVRQJ9EXplDxM89YTcLoCfDexmKuFXQbs",
@@ -24,14 +24,14 @@ let weekChartInstance = null;
 let catChartInstance = null;
 let pendingConfirmAction = null;
 
-// Globale Variablen für UI Status
+// Globale Variablen für HTML-Zugriff
 window.currentSubtasks = [];
 window.selectedRecurDays = [];
 const daysDisplay = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 let currentTheme = localStorage.getItem('plannerTheme') || 'cosmic';
 
 // ==========================================
-// 2. INITIALISIERUNG
+// 2. STARTUP
 // ==========================================
 try {
     app = initializeApp(firebaseConfig);
@@ -41,25 +41,19 @@ try {
     arcRef = collection(db, 'week_archives');
     metaDocRef = doc(db, 'settings', 'weekInfo');
     
-    console.log("Firebase verbunden.");
+    console.log("Firebase erfolgreich verbunden.");
     initApp();
 } catch(e) { 
-    console.error("Firebase Init Fehler:", e);
-    alert("Fehler beim Starten: " + e.message);
+    console.error("Critical Error:", e);
+    alert("Fehler beim Start: " + e.message);
 }
 
 function initApp() {
-    // Theme laden
     applyTheme(currentTheme);
-
-    // Listener starten
     setupRealtimeListeners();
-    
-    // Daten laden
     fetchWeather();
     checkWeekStatus();
     
-    // Notification Button prüfen
     if ("Notification" in window && Notification.permission === "granted") {
         const btn = document.getElementById('notify-btn');
         if(btn) btn.style.display = 'none';
@@ -67,17 +61,17 @@ function initApp() {
 }
 
 // ==========================================
-// 3. THEME LOGIK
+// 3. THEME MANAGER
 // ==========================================
 function applyTheme(themeName) {
     const linkTag = document.getElementById('theme-stylesheet');
     if(linkTag) {
-        // Pfad: ./css/themename.css
         linkTag.href = `./css/${themeName}.css`;
     }
 }
 
 window.toggleTheme = () => {
+    // Reihenfolge: Cosmic -> Aurora (jetzt dunkel) -> Midnight -> Cosmic
     if(currentTheme === 'cosmic') currentTheme = 'aurora';
     else if(currentTheme === 'aurora') currentTheme = 'midnight';
     else currentTheme = 'cosmic';
@@ -85,17 +79,16 @@ window.toggleTheme = () => {
     localStorage.setItem('plannerTheme', currentTheme);
     applyTheme(currentTheme);
     
-    // Charts neu zeichnen (wegen Farben)
+    // Charts aktualisieren, falls Dashboard offen
     if(!document.getElementById('dashboardModal').classList.contains('hidden')) {
          window.openLiveDashboard(); 
     }
 };
 
 // ==========================================
-// 4. FIREBASE LISTENER
+// 4. DATENBANK LISTENERS
 // ==========================================
 function setupRealtimeListeners() {
-    // Kategorien
     onSnapshot(catRef, snap => {
         allCategories = {};
         const select = document.getElementById('taskCatSelect');
@@ -107,23 +100,20 @@ function setupRealtimeListeners() {
         renderCalendar(currentTasks);
     });
 
-    // Aufgaben
     onSnapshot(colRef, snap => {
         currentTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderCalendar(currentTasks);
     });
 
-    // Archiv
     onSnapshot(query(arcRef, orderBy('archivedAt', 'desc')), snap => {
         allArchives = snap.docs.map(d => ({id: d.id, ...d.data()}));
     });
 }
 
 // ==========================================
-// 5. HELFER FUNKTIONEN (Wetter, Archiv, Stats)
+// 5. HELFER (Wetter, Archiv, Stats)
 // ==========================================
 
-// Wetter API
 async function fetchWeather() {
     try {
         const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); 
@@ -133,7 +123,6 @@ async function fetchWeather() {
         
         const res = await fetch(url); 
         const data = await res.json();
-        
         const getWeatherIcon = (c) => c<=3?'sun':c<=48?'cloud':c<=67?'cloud-rain':c<=77?'snowflake':'cloud-lightning';
         
         daysDisplay.forEach((dayName, i) => {
@@ -145,10 +134,9 @@ async function fetchWeather() {
             }
         });
         renderCalendar(currentTasks);
-    } catch(e) { console.warn("Wetter Fehler (nicht kritisch):", e); }
+    } catch(e) { console.warn("Wetter Fehler:", e); }
 }
 
-// Auto-Archive Logic
 function getCurrentMondayDate() {
     const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff)).toISOString().split('T')[0];
@@ -175,13 +163,12 @@ async function checkWeekStatus() {
                     await batch.commit();
                 }
                 await setDoc(metaDocRef, { currentMonday: realMonday });
-                alert("Neue Woche! Alte Aufgaben wurden archiviert.");
+                alert("Neue Woche! Alte Aufgaben archiviert.");
             }
         }
-    } catch(e) { console.error("Auto-Archive Error", e); }
+    } catch(e) { console.error("Archive Error", e); }
 }
 
-// Statistik Rechner
 function generateStatsObject(tasks) {
     const total = tasks.length;
     const done = tasks.filter(t => t.completed).length;
@@ -257,16 +244,17 @@ function renderDashboardModal(stats, title, subtitle) {
     const ctxWeek = document.getElementById('weekChart');
     const ctxCat = document.getElementById('catChart');
     
-    // Farben je nach Theme
-    let tickColor = '#94a3b8';
+    // --- FARB LOGIK FÜR CHARTS ---
+    // Da Aurora jetzt auch dunkel ist, nutzen wir fast immer helle Schrift
+    let tickColor = '#94a3b8'; 
     let gridColor = 'rgba(255,255,255,0.05)';
     let openBarColor = 'rgba(255,255,255,0.1)';
 
-    if (currentTheme === 'aurora') {
-        tickColor = '#475569'; gridColor = 'rgba(0,0,0,0.05)'; openBarColor = 'rgba(0,0,0,0.05)';
-    } else if (currentTheme === 'midnight') {
+    if (currentTheme === 'midnight') {
+        // Midnight bekommt etwas dunklere Töne
         tickColor = '#525252'; gridColor = '#262626'; openBarColor = '#262626';
     }
+    // Cosmic und Aurora nutzen die hellen Standardwerte
 
     Chart.defaults.color = tickColor;
     Chart.defaults.borderColor = gridColor;
@@ -308,9 +296,9 @@ function renderDashboardModal(stats, title, subtitle) {
     }
     document.getElementById('dashboardModal').classList.remove('hidden');
 }
+
 window.closeDashboard = () => document.getElementById('dashboardModal').classList.add('hidden');
 
-// Archiv
 window.openArchive = () => {
     document.getElementById('archive-list').innerHTML = allArchives.map(data => {
         const date = new Date(data.archivedAt).toLocaleDateString();
@@ -329,7 +317,7 @@ window.clearAllArchives = () => { window.openConfirm(async () => { const snap = 
 window.closeArchive = () => document.getElementById('archiveModal').classList.add('hidden');
 
 // ==========================================
-// 7. CALENDAR RENDER & TASKS
+// 7. CALENDAR & TASK RENDERER
 // ==========================================
 
 window.renderCalendar = (tasks) => {
@@ -349,7 +337,7 @@ window.renderCalendar = (tasks) => {
         const list = col.querySelector('.task-list'); if(!list) return;
         let dayTasks = tasks.filter(t => t.day === day);
         
-        // Sortierung: NUR nach Zeit
+        // Sortierung: NUR NACH ZEIT
         dayTasks.sort((a, b) => {
             const timeA = a.timeFrom || a.time || "23:59"; const timeB = b.timeFrom || b.time || "23:59"; 
             return timeA.localeCompare(timeB);
@@ -402,7 +390,7 @@ window.removeSubtask = (i) => { window.currentSubtasks.splice(i, 1); renderModal
 window.toggleModalSubtask = (i) => { window.currentSubtasks[i].done = !window.currentSubtasks[i].done; renderModalSubtasks(); }
 window.toggleDayRecur = (btn, day) => { if(window.selectedRecurDays.includes(day)) { window.selectedRecurDays = window.selectedRecurDays.filter(d => d !== day); btn.classList.remove('active'); } else { window.selectedRecurDays.push(day); btn.classList.add('active'); } }
 
-// CRUD Operations
+// CRUD
 window.openModal = (d) => { 
     document.getElementById('modalTitle').innerText = "Neue Aufgabe"; document.getElementById('taskId').value = ""; document.getElementById('taskDay').value = d; document.getElementById('taskText').value=""; document.getElementById('newCatName').value=""; document.getElementById('taskTimeFrom').value=""; document.getElementById('taskTimeTo').value=""; document.getElementById('taskPriority').checked = false; window.currentSubtasks = []; window.renderModalSubtasks(); window.selectedRecurDays = []; document.querySelectorAll('.recur-btn').forEach(b => b.classList.remove('active')); 
     document.getElementById('btnDuplicate').classList.add('hidden'); 
