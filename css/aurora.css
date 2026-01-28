@@ -1,0 +1,45 @@
+/* css/aurora.css */
+body { background-color: #c6ddf3; color: #334155; }
+
+/* Background */
+.gradient-background {
+    display: block;
+    background: radial-gradient(at top left, #e0f2fe, transparent), 
+                radial-gradient(at top right, #f3e8ff, transparent), 
+                radial-gradient(at bottom left, #dcfce7, transparent);
+    background-color: #c6ddf3; background-size: 100% 100%;
+}
+
+/* Glass UI Elements */
+.bg-white\/5, .bg-white\/10, .day-column {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+    color: #1e293b;
+}
+
+.day-column.collapsed { background: rgba(255,255,255,0.5) !important; }
+.day-column.drag-over { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80; }
+
+/* Text Overrides */
+.text-white { color: #0f172a !important; }
+.text-white\/50 { color: #64748b !important; }
+.text-gray-300 { color: #475569 !important; }
+.text-gray-400 { color: #94a3b8 !important; }
+
+/* Modals */
+.bg-slate-900, .bg-slate-900\/95, .bg-\[\#0f172a\] {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(24px); color: #0f172a;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); border: 1px solid white;
+}
+
+/* Inputs */
+input, textarea, select, .bg-slate-800 {
+    background-color: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;
+    box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.task-card.expanded .task-details-wrapper { border-top-color: #e2e8f0; }
+.recur-btn.active { background-color: #4ade80; color: black; }
