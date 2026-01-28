@@ -3,72 +3,65 @@
 /* Basis: Dunkelblau/Grau statt Weiß */
 body { background-color: #0f172a; color: #e2e8f0; }
 
-/* Hintergrund: Sanfte, dunkle "Nordlichter" (Cyan, Lila, Blau) */
+/* Hintergrund: Sanfte, dunkle "Nordlichter" */
 .gradient-background {
     display: block;
     background: 
-        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15), transparent 50%), /* Light Blue Glow */
-        radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.15), transparent 50%), /* Purple Glow */
-        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.1), transparent 50%), /* Emerald Glow */
-        radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.15), transparent 50%); /* Indigo Glow */
-    background-color: #0f172a; /* Fallback Dark */
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15), transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.15), transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.1), transparent 50%),
+        radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.15), transparent 50%);
+    background-color: #0f172a;
     background-size: 100% 100%;
 }
 
-/* --- GLASS KARTEN (DUNKEL) --- */
-/* Hier passiert die Magie: Halbtransparente dunkle Schichten */
+/* Glass UI Elements */
 .bg-white\/5, .bg-white\/10, .day-column {
-    background: rgba(30, 41, 59, 0.6) !important; /* Dunkles Slate mit Transparenz */
-    backdrop-filter: blur(20px); /* Starker Blur Effekt */
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08); /* Sehr feiner weißer Rand */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Tiefer Schatten */
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     color: #f1f5f9;
 }
 
-/* Collapsed Spalten */
 .day-column.collapsed { 
     background: rgba(30, 41, 59, 0.4) !important; 
     border-color: rgba(255,255,255,0.05);
 }
 
 .day-column.drag-over { 
-    background: rgba(16, 185, 129, 0.2) !important; /* Grünes Leuchten beim Draggen */
+    background: rgba(16, 185, 129, 0.2) !important;
     border-color: #34d399; 
 }
 
-/* --- TEXT ANPASSUNGEN --- */
-/* Da es jetzt dunkel ist, muss der Text hell sein (Gegenteil zur alten Version) */
+/* Text */
 .text-white { color: #ffffff !important; }
-.text-white\/50 { color: #94a3b8 !important; } /* Helles Grau */
+.text-white\/50 { color: #94a3b8 !important; }
 .text-gray-300 { color: #cbd5e1 !important; }
 .text-gray-400 { color: #94a3b8 !important; }
 
-/* --- MODALS (Fenster) --- */
+/* Modals */
 .bg-slate-900, .bg-slate-900\/95, .bg-\[\#0f172a\] {
-    background: rgba(15, 23, 42, 0.85) !important; /* Sehr dunkles Glas */
-    backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* --- INPUTS & BUTTONS --- */
+/* Inputs */
 input, textarea, select, .bg-slate-800 {
-    background-color: rgba(15, 23, 42, 0.6) !important; /* Dunkles Feld */
+    background-color: rgba(15, 23, 42, 0.6) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: white !important;
-    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    color: white !important; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
+input:focus, textarea:focus { border-color: #38bdf8 !important; outline: none; }
 
-input:focus, textarea:focus {
-    border-color: #38bdf8 !important; /* Helles Blau bei Fokus */
-    outline: none;
-}
-
-/* Details Linie */
 .task-card.expanded .task-details-wrapper { border-top-color: rgba(255,255,255,0.1); }
-
-/* Buttons */
 .recur-btn { border-color: rgba(255,255,255,0.1); }
 .recur-btn.active { background-color: #38bdf8; color: black; font-weight: bold; border-color: #38bdf8; }
+
+/* Hervorhebung für den aktuellen Tag */
+.day-column.current-day-highlight {
+    border: 1px solid #38bdf8 !important; /* Hellblauer Rand */
+    background: rgba(56, 189, 248, 0.15) !important; /* Bläuliches Glas */
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.1);
+}
