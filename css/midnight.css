@@ -25,3 +25,9 @@ input, textarea, select, .bg-slate-800 {
 
 .task-card.expanded .task-details-wrapper { border-top-color: #333; }
 .recur-btn.active { background-color: #4ade80; color: black; }
+
+/* Hervorhebung für den aktuellen Tag */
+.day-column.current-day-highlight {
+    border: 1px solid #ffffff !important; /* Harter weißer Rand */
+    background-color: #262626 !important; /* Etwas heller als der Hintergrund */
+}
