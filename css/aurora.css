@@ -65,3 +65,70 @@ input:focus, textarea:focus { border-color: #38bdf8 !important; outline: none; }
     background: rgba(56, 189, 248, 0.15) !important; /* Bläuliches Glas */
     box-shadow: 0 0 30px rgba(56, 189, 248, 0.1);
 }
+/* =========================================
+   AURORA MODAL OVERRIDES
+   Helles "Frozen Glass" Design für Fenster
+   ========================================= */
+
+/* 1. Das Fenster selbst (Hell & Glasig) */
+#taskModal > div, 
+#dashboardModal > div, 
+#archiveModal > div, 
+#confirmModal > div,
+#catManageModal > div {
+    /* Helles Weiß mit hoher Transparenz */
+    background: rgba(255, 255, 255, 0.75) !important;
+    
+    /* Starker Blur-Effekt für den Milchglas-Look */
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    
+    /* Zarter weißer Rand */
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    
+    /* Sanfter Schatten in Pastellfarben */
+    box-shadow: 0 20px 40px -10px rgba(167, 139, 250, 0.2), 0 0 20px rgba(255, 255, 255, 0.6) !important;
+    
+    /* WICHTIG: Text dunkel erzwingen (da index.html "text-white" nutzt) */
+    color: #1e293b !important;
+}
+
+/* 2. Eingabefelder und Listen */
+#taskModal input, 
+#taskModal select, 
+#taskModal .bg-slate-800, /* Überschreibt dunkle Hintergründe */
+#catManageModal input,
+#cat-manage-list > div {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(203, 213, 225, 0.6) !important;
+    color: #0f172a !important; /* Dunkelblau-Grauer Text */
+}
+
+/* 3. Wenn man tippt (Fokus) */
+#taskModal input:focus, 
+#taskModal select:focus {
+    background-color: #ffffff !important;
+    border-color: #8b5cf6 !important; /* Violett beim Tippen */
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1) !important;
+    outline: none !important;
+}
+
+/* 4. Text-Anpassungen (Damit man alles liest) */
+#taskModal h2, 
+#dashboardModal h2, 
+#archiveModal h2, 
+#dashboard-title,
+.text-gray-400 {
+    color: #0f172a !important; /* Harter Kontrast für Überschriften */
+    text-shadow: none !important;
+}
+
+/* Icons und Buttons im Fenster */
+button i, button svg {
+    stroke: #334155 !important; /* Dunkle Icons */
+}
+
+/* Spezifisch für den "Speichern"-Button, damit der Text lesbar bleibt */
+button.bg-green-500 {
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
