@@ -178,6 +178,123 @@ window.renderCalendar = (tasks) => {
     if (window.lucide) lucide.createIcons();
 }
 
-// (Hier fehlen noch die restlichen Helper Functions aus dem vorherigen Script.js wie toggleCardSubtask, CRUD, InitGridStructure - BITTE EINFÜGEN WIE IM VORHERIGEN SCHRITT)
-// Damit das Script nicht zu lang wird, hier der Hinweis: 
-// Kopiere ALLE Funktionen ab "window.toggleCardSubtask" bis zum Ende "initGridStructure()" vom vorherigen Antwort-Block hier rein.
+// ==========================================
+// FEHLENDE HELFER-FUNKTIONEN
+// (Bitte ans Ende der script.js kopieren)
+// ==========================================
+
+// 1. WETTER API
+async function fetchWeather() {
+    try {
+        const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); 
+        const monday = new Date(d.setDate(diff)); const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+        const startStr = monday.toISOString().split('T')[0]; const endStr = sunday.toISOString().split('T')[0];
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=51.16&longitude=10.45&daily=weathercode,temperature_2m_max&timezone=auto&start_date=${startStr}&end_date=${endStr}`;
+        
+        const res = await fetch(url); 
+        const data = await res.json();
+        
+        const getWeatherIcon = (c) => c<=3?'sun':c<=48?'cloud':c<=67?'cloud-rain':c<=77?'snowflake':'cloud-lightning';
+        
+        daysDisplay.forEach((dayName, i) => {
+            if(data.daily && data.daily.weathercode && data.daily.weathercode[i] !== undefined) {
+                weatherData[dayName] = { 
+                    temp: Math.round(data.daily.temperature_2m_max[i]), 
+                    icon: getWeatherIcon(data.daily.weathercode[i]) 
+                };
+            }
+        });
+        
+        // Kalender neu zeichnen, um Wetter anzuzeigen
+        renderCalendar(currentTasks);
+        console.log("Wetter geladen");
+    } catch(e) { 
+        console.warn("Wetter Fehler (nicht kritisch):", e); 
+    }
+}
+
+// 2. WOCHEN-CHECK & ARCHIVIERUNG
+function getCurrentMondayDate() {
+    const d = new Date(); 
+    const day = d.getDay(); 
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff)).toISOString().split('T')[0];
+}
+
+async function checkWeekStatus() {
+    try {
+        const snap = await getDoc(metaDocRef);
+        const realMonday = getCurrentMondayDate();
+
+        if (!snap.exists()) {
+            await setDoc(metaDocRef, { currentMonday: realMonday });
+        } else {
+            const storedMonday = snap.data().currentMonday;
+            if (storedMonday !== realMonday) {
+                console.log("Neue Woche erkannt!");
+                const taskSnap = await getDocs(colRef);
+                const tasksToArchive = taskSnap.docs.map(d => ({...d.data(), id: d.id}));
+                
+                if(tasksToArchive.length > 0) {
+                    const archiveData = generateArchiveStats(tasksToArchive, storedMonday);
+                    await addDoc(arcRef, archiveData);
+                    
+                    const batch = writeBatch(db);
+                    taskSnap.docs.forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+                }
+                await setDoc(metaDocRef, { currentMonday: realMonday });
+                alert("Neue Woche hat begonnen! Deine alte Woche wurde archiviert.");
+            }
+        }
+    } catch(e) { console.error("Auto-Archive Error", e); }
+}
+
+// 3. STATISTIK BERECHNUNG
+function generateStatsObject(tasks) {
+    const total = tasks.length;
+    const done = tasks.filter(t => t.completed).length;
+    const percent = total > 0 ? Math.round((done/total)*100) : 0;
+    
+    const prioTotal = tasks.filter(t => t.isPriority).length;
+    const prioDone = tasks.filter(t => t.isPriority && t.completed).length;
+    const prioScore = prioTotal > 0 ? Math.round((prioDone/prioTotal)*100) : 0;
+    
+    let totalMinutes = 0;
+    tasks.forEach(t => {
+        if(t.completed && t.timeFrom && t.timeTo) {
+            const [h1, m1] = t.timeFrom.split(':').map(Number);
+            const [h2, m2] = t.timeTo.split(':').map(Number);
+            let mins = (h2 * 60 + m2) - (h1 * 60 + m1);
+            if(mins > 0) totalMinutes += mins;
+        }
+    });
+    const hours = (totalMinutes / 60).toFixed(1);
+    
+    const weekData = daysDisplay.map(day => {
+        const dayTasks = tasks.filter(t => t.day === day);
+        return { total: dayTasks.length, completed: dayTasks.filter(t => t.completed).length };
+    });
+    
+    const catStats = {};
+    tasks.forEach(t => {
+        const catId = t.categoryId;
+        if(!catId || catId === 'none' || catId === '') return;
+        
+        if(!catStats[catId]) {
+            const catData = allCategories[catId] || { name: 'Unbekannt', color: '#666' };
+            catStats[catId] = { name: catData.name, color: catData.color, total: 0, done: 0 };
+        }
+        catStats[catId].total++;
+        if(t.completed) catStats[catId].done++;
+    });
+    
+    return { total, done, percent, prioScore, hours, weekData, catStats };
+}
+
+function generateArchiveStats(tasks, weekLabelDate) {
+    const stats = generateStatsObject(tasks);
+    const d = new Date(weekLabelDate);
+    const label = `Woche vom ${d.toLocaleDateString()}`;
+    return { weekRange: label, archivedAt: Date.now(), ...stats };
+}
