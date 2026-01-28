@@ -31,3 +31,59 @@ input, textarea, select, .bg-slate-800 {
     border: 1px solid #ffffff !important; /* Harter weißer Rand */
     background-color: #262626 !important; /* Etwas heller als der Hintergrund */
 }
+/* =========================================
+   MIDNIGHT MODAL FIX (Aggressiv)
+   Sattes Schwarz, kein Schnickschnack
+   ========================================= */
+
+/* 1. Die Fenster selbst */
+#taskModal .bg-slate-900\/95,
+#dashboardModal .bg-\[\#0f172a\],
+#archiveModal .bg-slate-900,
+#confirmModal .bg-slate-900,
+#catManageModal .bg-slate-900 {
+    /* Absolutes Schwarz mit minimaler Transparenz */
+    background-color: rgba(5, 5, 5, 0.98) !important;
+    
+    /* Ein sehr feiner grauer Rand zur Abgrenzung */
+    border: 1px solid #333333 !important;
+    
+    /* Kein "Glow", sondern ein harter schwarzer Schatten */
+    box-shadow: 0 0 0 1px #000, 0 25px 50px rgba(0, 0, 0, 1) !important;
+    
+    /* Optional: Ecken etwas weniger rund machen für den härteren Look */
+    border-radius: 12px !important;
+}
+
+/* 2. Überschriften */
+#taskModal h2, #dashboardModal h2, #archiveModal h2, #dashboard-title {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    letter-spacing: -1px !important; /* Engere Buchstaben für modernen Look */
+}
+
+/* 3. Eingabefelder und Listen */
+#taskModal input, 
+#taskModal select, 
+#taskModal .bg-slate-800,
+#catManageModal input,
+#cat-manage-list > div {
+    background-color: #121212 !important; /* Sehr dunkles Grau */
+    border: 1px solid #262626 !important;
+    color: #e5e5e5 !important;
+    box-shadow: none !important; /* Flaches Design */
+}
+
+/* 4. Wenn man tippt (Fokus) - Weißer Rand statt Bunt */
+#taskModal input:focus, 
+#taskModal select:focus {
+    background-color: #000000 !important;
+    border-color: #ffffff !important; 
+    outline: none !important;
+}
+
+/* 5. Buttons im Modal anpassen */
+#taskModal button.bg-white\/5 {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333 !important;
+}
