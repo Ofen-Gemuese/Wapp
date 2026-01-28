@@ -1,45 +1,74 @@
-/* css/aurora.css */
-body { background-color: #c6ddf3; color: #334155; }
+/* css/aurora.css - VERSION 2 (DARK GLASS) */
 
-/* Background */
+/* Basis: Dunkelblau/Grau statt Weiß */
+body { background-color: #0f172a; color: #e2e8f0; }
+
+/* Hintergrund: Sanfte, dunkle "Nordlichter" (Cyan, Lila, Blau) */
 .gradient-background {
     display: block;
-    background: radial-gradient(at top left, #e0f2fe, transparent), 
-                radial-gradient(at top right, #f3e8ff, transparent), 
-                radial-gradient(at bottom left, #dcfce7, transparent);
-    background-color: #c6ddf3; background-size: 100% 100%;
+    background: 
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15), transparent 50%), /* Light Blue Glow */
+        radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.15), transparent 50%), /* Purple Glow */
+        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.1), transparent 50%), /* Emerald Glow */
+        radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.15), transparent 50%); /* Indigo Glow */
+    background-color: #0f172a; /* Fallback Dark */
+    background-size: 100% 100%;
 }
 
-/* Glass UI Elements */
+/* --- GLASS KARTEN (DUNKEL) --- */
+/* Hier passiert die Magie: Halbtransparente dunkle Schichten */
 .bg-white\/5, .bg-white\/10, .day-column {
-    background: rgba(255, 255, 255, 0.7) !important;
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
-    color: #1e293b;
+    background: rgba(30, 41, 59, 0.6) !important; /* Dunkles Slate mit Transparenz */
+    backdrop-filter: blur(20px); /* Starker Blur Effekt */
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08); /* Sehr feiner weißer Rand */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Tiefer Schatten */
+    color: #f1f5f9;
 }
 
-.day-column.collapsed { background: rgba(255,255,255,0.5) !important; }
-.day-column.drag-over { background: rgba(74, 222, 128, 0.2) !important; border-color: #4ade80; }
+/* Collapsed Spalten */
+.day-column.collapsed { 
+    background: rgba(30, 41, 59, 0.4) !important; 
+    border-color: rgba(255,255,255,0.05);
+}
 
-/* Text Overrides */
-.text-white { color: #0f172a !important; }
-.text-white\/50 { color: #64748b !important; }
-.text-gray-300 { color: #475569 !important; }
+.day-column.drag-over { 
+    background: rgba(16, 185, 129, 0.2) !important; /* Grünes Leuchten beim Draggen */
+    border-color: #34d399; 
+}
+
+/* --- TEXT ANPASSUNGEN --- */
+/* Da es jetzt dunkel ist, muss der Text hell sein (Gegenteil zur alten Version) */
+.text-white { color: #ffffff !important; }
+.text-white\/50 { color: #94a3b8 !important; } /* Helles Grau */
+.text-gray-300 { color: #cbd5e1 !important; }
 .text-gray-400 { color: #94a3b8 !important; }
 
-/* Modals */
+/* --- MODALS (Fenster) --- */
 .bg-slate-900, .bg-slate-900\/95, .bg-\[\#0f172a\] {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(24px); color: #0f172a;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); border: 1px solid white;
+    background: rgba(15, 23, 42, 0.85) !important; /* Sehr dunkles Glas */
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Inputs */
+/* --- INPUTS & BUTTONS --- */
 input, textarea, select, .bg-slate-800 {
-    background-color: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;
-    box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background-color: rgba(15, 23, 42, 0.6) !important; /* Dunkles Feld */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
-.task-card.expanded .task-details-wrapper { border-top-color: #e2e8f0; }
-.recur-btn.active { background-color: #4ade80; color: black; }
+input:focus, textarea:focus {
+    border-color: #38bdf8 !important; /* Helles Blau bei Fokus */
+    outline: none;
+}
+
+/* Details Linie */
+.task-card.expanded .task-details-wrapper { border-top-color: rgba(255,255,255,0.1); }
+
+/* Buttons */
+.recur-btn { border-color: rgba(255,255,255,0.1); }
+.recur-btn.active { background-color: #38bdf8; color: black; font-weight: bold; border-color: #38bdf8; }
